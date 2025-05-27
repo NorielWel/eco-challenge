@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoChallenge Bordspel</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .game-header {
+            background: linear-gradient(45deg, #4CAF50, #2E7D32);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .game-header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .game-board {
+            position: relative;
+            width: 800px;
+            height: 800px;
+            margin: 20px auto;
+            background: linear-gradient(45deg, #E8F5E8, #C8E6C9);
+            border: 10px solid #4CAF50;
+            border-radius: 20px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.1);
+        }
+        
+        .path {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 3px solid #2E7D32;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .path:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        .start { background: #4CAF50; color: white; }
+        .finish { background: #FF5722; color: white; }
+        .green { background: #81C784; }
+        .yellow { background: #FFD54F; }
+        .red { background: #FF8A80; }
+        .special { background: linear-gradient(45deg, #9C27B0, #3F51B5); color: white; }
+        
+        .center-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.95);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 3px solid #4CAF50;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .center-info h2 {
+            color: #2E7D32;
+            margin-top: 0;
+        }
+        
+        .game-materials {
+            padding: 20px;
+            background: #F5F5F5;
+        }
+        
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .material-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .card-deck {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 2px solid #E0E0E0;
+            transition: transform 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        
+        .card.challenge { border-color: #FF9800; background: #FFF3E0; }
+        .card.action { border-color: #2196F3; background: #E3F2FD; }
+        .card.fact { border-color: #9C27B0; background: #F3E5F5; }
+        
+        .dice-area {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .dice {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 3px solid #4CAF50;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .dice:hover {
+            transform: rotate(45deg);
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .player-pieces {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .player-piece {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .player1 { background: #F44336; }
+        .player2 { background: #2196F3; }
+        .player3 { background: #FF9800; }
+        .player4 { background: #9C27B0; }
+        
+        .rules {
+            background: #E8F5E8;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+        
+        .animated { animation: bounce 2s infinite; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🌍 EcoChallenge Bordspel 🌱</h1>
+            <p>Ontdek je ecologische impact en word een milieuheld!</p>
+        </div>
+        
+        <div class="game-board">
+            <!-- Buitenste ring van vakjes -->
+            <div class="path start" style="top: 700px; left: 20px;">START<br>🏠</div>
+            <div class="path green" style="top: 700px; left: 120px;">Fiets naar school<br>+2 🌱</div>
+            <div class="path yellow" style="top: 700px; left: 220px;">Korte douche<br>+1 🌱</div>
+            <div class="path red" style="top: 700px; left: 320px;">Vlees eten<br>-1 🌱</div>
+            <div class="path special" style="top: 700px; left: 420px;">ECO<br>CHALLENGE</div>
+            <div class="path green" style="top: 700px; left: 520px;">Afval scheiden<br>+2 🌱</div>
+            <div class="path yellow" style="top: 700px; left: 620px;">Licht uitdoen<br>+1 🌱</div>
+            <div class="path red" style="top: 700px; left: 720px;">Auto meerijden<br>-1 🌱</div>
+            
+            <!-- Rechter kant -->
+            <div class="path green" style="top: 600px; left: 720px;">Herbruikbare fles<br>+2 🌱</div>
+            <div class="path special" style="top: 500px; left: 720px;">MILIEU<br>FEIT</div>
+            <div class="path yellow" style="top: 400px; left: 720px;">Vegetarisch eten<br>+1 🌱</div>
+            <div class="path red" style="top: 300px; left: 720px;">Fast fashion<br>-2 🌱</div>
+            <div class="path green" style="top: 200px; left: 720px;">Energie besparen<br>+2 🌱</div>
+            <div class="path special" style="top: 100px; left: 720px;">ACTIE<br>KAART</div>
+            <div class="path yellow" style="top: 20px; left: 720px;">Repareren ipv<br>weggooien +1 🌱</div>
+            
+            <!-- Bovenkant -->
+            <div class="path red" style="top: 20px; left: 620px;">Vliegtuig nemen<br>-3 🌱</div>
+            <div class="path green" style="top: 20px; left: 520px;">Biologisch eten<br>+2 🌱</div>
+            <div class="path special" style="top: 20px; left: 420px;">ECO<br>CHALLENGE</div>
+            <div class="path yellow" style="top: 20px; left: 320px;">Openbaar vervoer<br>+1 🌱</div>
+            <div class="path red" style="top: 20px; left: 220px;">Veel plastic<br>-2 🌱</div>
+            <div class="path green" style="top: 20px; left: 120px;">Zonnepanelen<br>+3 🌱</div>
+            <div class="path special" style="top: 20px; left: 20px;">MILIEU<br>FEIT</div>
+            
+            <!-- Linker kant -->
+            <div class="path yellow" style="top: 100px; left: 20px;">Tweedehands kopen<br>+1 🌱</div>
+            <div class="path red" style="top: 200px; left: 20px;">Lange douche<br>-2 🌱</div>
+            <div class="path special" style="top: 300px; left: 20px;">ACTIE<br>KAART</div>
+            <div class="path green" style="top: 400px; left: 20px;">Eigen moestuin<br>+3 🌱</div>
+            <div class="path yellow" style="top: 500px; left: 20px;">Minder vlees<br>+1 🌱</div>
+            <div class="path special" style="top: 600px; left: 20px;">ECO<br>CHALLENGE</div>
+            
+            <!-- Finish -->
+            <div class="path finish" style="top: 350px; left: 360px;">FINISH<br>🏆</div>
+            
+            <div class="center-info">
+                <h2>🌍 EcoChallenge</h2>
+                <p><strong>Doel:</strong> Verzamel zoveel mogelijk 🌱 door duurzame keuzes te maken!</p>
+                <div class="player-pieces">
+                    <div class="player-piece player1"></div>
+                    <div class="player-piece player2"></div>
+                    <div class="player-piece player3"></div>
+                    <div class="player-piece player4"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dice-area">
+            <h3>Dobbelstenen</h3>
+            <div class="dice" onclick="rollDice(this)">🎲</div>
+            <div class="dice" onclick="rollDice(this)">🎲</div>
+            <p>Klik op de dobbelstenen om te gooien!</p>
+        </div>
+        
+        <div class="game-materials">
+            <h2>📦 Spelmateriaal</h2>
+            
+            <div class="materials-grid">
+                <div class="material-card">
+                    <h3>🎯 Spelregels</h3>
+                    <div class="rules">
+                        <p><strong>Doel:</strong> Verzamel de meeste 🌱 (ecopunten) door het spel heen</p>
+                        <p><strong>Start:</strong> Alle spelers beginnen bij START met 5 🌱</p>
+                        <p><strong>Beurt:</strong> Gooi de dobbelsteen en loop het aantal vakjes</p>
+                        <p><strong>Vakjes:</strong></p>
+                        <ul>
+                            <li>🟢 Groen = +2 of +3 🌱</li>
+                            <li>🟡 Geel = +1 🌱</li>
+                            <li>🔴 Rood = -1, -2 of -3 🌱</li>
+                            <li>🟣 Paars = Trek een kaart</li>
+                        </ul>
+                        <p><strong>Winnen:</strong> Wie het eerst bij FINISH komt met de meeste 🌱 wint!</p>
+                    </div>
+                </div>
+                
+                <div class="material-card">
+                    <h3>🏆 Scorebord</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="background: #4CAF50; color: white;">
+                            <th style="padding: 10px; border: 1px solid #ddd;">Speler</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">🌱 Punten</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">🔴 Speler 1</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">___</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">🔵 Speler 2</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">___</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">🟠 Speler 3</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">___</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">🟣 Speler 4</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">___</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <h3>🃏 Spelkaarten</h3>
+            <div class="card-deck">
+                <div class="card challenge">
+                    <h4>🎯 ECO CHALLENGE</h4>
+                    <p><strong>Plasticvrije week</strong></p>
+                    <p>Probeer een week zonder plastic verpakkingen. +3 🌱 als je het doet!</p>
+                </div>
+                
+                <div class="card action">
+                    <h4>⚡ ACTIE KAART</h4>
+                    <p><strong>Energiebespaarder</strong></p>
+                    <p>Zet alle apparaten uit standby. Ga 2 vakjes extra vooruit!</p>
+                </div>
+                
+                <div class="card fact">
+                    <h4>🧠 MILIEU FEIT</h4>
+                    <p><strong>Wist je dat...</strong></p>
+                    <p>1 hamburger evenveel water kost als 2 maanden douchen? Trek nog een kaart!</p>
+                </div>
+                
+                <div class="card challenge">
+                    <h4>🎯 ECO CHALLENGE</h4>
+                    <p><strong>Vega-dag</strong></p>
+                    <p>Eet vandaag alleen vegetarisch. +2 🌱 en vertel waarom dit helpt!</p>
+                </div>
+                
+                <div class="card action">
+                    <h4>⚡ ACTIE KAART</h4>
+                    <p><strong>Reparatie-expert</strong></p>
+                    <p>Je repareert iets kapots ipv weggooien. +2 🌱 en nog een beurt!</p>
+                </div>
+                
+                <div class="card fact">
+                    <h4>🧠 MILIEU FEIT</h4>
+                    <p><strong>Wist je dat...</strong></p>
+                    <p>Recycling 1 blikje genoeg energie bespaart voor 3 uur TV kijken? +1 🌱</p>
+                </div>
+                
+                <div class="card challenge">
+                    <h4>🎯 ECO CHALLENGE</h4>
+                    <p><strong>Afval-detective</strong></p>
+                    <p>Tel hoeveel afval je gezin 1 dag produceert. Minder dan 5kg? +3 🌱</p>
+                </div>
+                
+                <div class="card action">
+                    <h4>⚡ ACTIE KAART</h4>
+                    <p><strong>Water-warrior</strong></p>
+                    <p>5 minuten douchen ipv 10. +1 🌱 en ga naar het dichtstbijzijnde groene vakje!</p>
+                </div>
+                
+                <div class="card fact">
+                    <h4>🧠 MILIEU FEIT</h4>
+                    <p><strong>Wist je dat...</strong></p>
+                    <p>Nederland gebruikt 4x meer dan duurzaam is? Alle spelers krijgen +1 🌱 voor bewustwording!</p>
+                </div>
+            </div>
+            
+            <div class="material-card" style="margin-top: 20px;">
+                <h3>📋 Extra Materiaal Nodig</h3>
+                <ul>
+                    <li>4 Spelerpionnen (verschillende kleuren)</li>
+                    <li>2 Dobbelstenen</li>
+                    <li>Ecopunten-fiches (🌱) of papier om punten bij te houden</li>
+                    <li>Kaarten uitprinten en knippen</li>
+                    <li>Timer voor challenges (optioneel)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function rollDice(dice) {
+            const result = Math.floor(Math.random() * 6) + 1;
+            dice.textContent = result;
+            dice.classList.add('animated');
+            setTimeout(() => {
+                dice.classList.remove('animated');
+            }, 2000);
+        }
+        
+        // Hover effecten voor het bord
+        document.querySelectorAll('.path').forEach(path => {
+            path.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.zIndex = '10';
+            });
+            
+            path.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+                this.style.zIndex = '1';
+            });
+        });
+    </script>
+</body>
+</html>
